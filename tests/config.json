@@ -1,0 +1,24 @@
+{
+  "loglevel": "debug",
+  "soa": "dyndns.example.net tests.dyndns.example.net 20170723 7200 3600 7200 120",
+  "nameservers": ["ns1.example.net", "ns2.example.net"],
+  "ttl": 3600,
+  "domain": "dyndns.example.net",
+  "handlers": [
+    {
+      "qname": "t1.dyndns.example.net",
+      "qtype": "A",
+      "file": "tests/data/t1.txt"
+    },
+    {
+      "qname": "t2.dyndns.example.net",
+      "qtype": "A",
+      "file": "tests/data/t2.txt"
+    },
+    {
+      "qname": "t3.dyndns.example.net",
+      "qtype": "AAAA",
+      "file": "tests/data/t3.txt"
+    }
+  ]
+}
