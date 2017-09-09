@@ -1,10 +1,16 @@
 from distutils.core import setup
 
+try:
+    import pypandoc
+    long_description = pypandoc.convert('README.md', 'rst')
+except(IOError, ImportError):
+    long_description = open('README.md').read()
+
 setup(
     name='pdyndns',
     description='PEERING testbed dynamic PowerDNS backend',
-    long_description=open('README.md', 'r').read(),
-    version='0.2.2',
+    long_description=long_description,
+    version='0.3',
     author='PEERING Testbed developers',
     author_email='team@peering.usc.edu',
     url='https://github.com/PEERINGTestbed/powerdns-pdyndns-backend',
@@ -16,8 +22,6 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Operating System :: POSIX',
         'Topic :: System :: Networking',
-        'Intended Audience :: Developers',
-        'Intended Audience :: System Administrators',
-        'Development Status :: 2 - Pre-Alpha'
+        'Development Status :: 3 - Alpha'
     ]
 )

@@ -1,4 +1,5 @@
-# Dynamic PowerDNS backend
+Dynamic PowerDNS backend
+========================
 
 [![PyPI](https://img.shields.io/pypi/v/pdyndns.svg)](https://pypi.org/project/pdyndns/)
 [![Python](https://img.shields.io/pypi/pyversions/pdyndns.svg)](https://pypi.org/project/pdyndns/)
@@ -9,7 +10,8 @@ a predefined list read from a text file.  We use this backend to
 steer RIPE Atlas traceroute measurements toward PEERING prefixes
 according to experiment requirements.
 
-# Usage
+Usage
+=====
 
 This module communicates with PowerDNS using PowerDNS's [pipe
 backend][1] protocol version 3.  The tool receives a single
@@ -21,7 +23,8 @@ schema][2].
  [1]: https://doc.powerdns.com/md/authoritative/backend-pipe/
  [2]: http://json-schema.org/
 
-## Backend configuration
+Backend configuration
+---------------------
 
 The configuration file specifies the DNS domain the backend is
 responsible for, and information required to answer `SOA` and `NS`
@@ -85,7 +88,8 @@ should be answered with IP addresses within `file`.  The `qtype`
 field specified whether IP addresses in `file` are IPv4 addresses
 (`qtype = A`) or IPv6 addresses (`qtype = AAAA`).
 
-## Setting up the parent DNS server
+Setting up the parent DNS server
+--------------------------------
 
 We also need to configure the authoritative name server for the
 parent domain (`peering.usc.edu` in our case) to forward all
@@ -101,7 +105,8 @@ to PowerDNS to achieve the same effect):
 atlas.peering.usc.edu.  NS          peering-atlas-ns.vms.uscnsl.net.
 ```
 
-## Testing pdyndns.py
+Testing pdyndns.py
+==================
 
 We have a test suite for `pdyndns.py`.  You can run it by installing
 [nose][10] and running `nosetests`.  Note that we require nose for
@@ -111,7 +116,8 @@ and performs some linting.
  [10]: http://nose.readthedocs.io/en/latest/
  [11]: https://pypi.python.org/pypi/tox
 
-# Acknowledgements
+Acknowledgements
+================
 
 Precursors and early implementations for this code include [RIPE
 Atlas][8]'s [atlas-dyndns][5], Emile Aben's [Scapy DNS Ninja][6] and
