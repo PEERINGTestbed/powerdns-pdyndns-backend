@@ -89,12 +89,10 @@ field specified whether IP addresses in `file` are IPv4 addresses
 
 We also need to configure the authoritative name server for the
 parent domain (`peering.usc.edu` in our case) to forward all
-requests for `atlas.peering.usc.edu` to the machine running
-[pdns-dyndns][4].
+requests for `atlas.peering.usc.edu` to the machine running the
+dynamic backend.
 
- [4]: https://github.com/PEERINGTestbed/pdns-dyndns
-
-If using [BIND] and if the [pdns-dyndns][4] server is
+If using BIND and if the dynamic backend server is
 `peering-atlas-ns.vms.uscnsl.net`, this can be achieved by adding
 the following to the zone database (equivalent entries can be added
 to PowerDNS to achieve the same effect):
@@ -112,14 +110,6 @@ and performs some linting.
 
  [10]: http://nose.readthedocs.io/en/latest/
  [11]: https://pypi.python.org/pypi/tox
-
-## Pushing to PyPI
-
-Run `python3 setup.py sdist upload` to push pdyndns.py to PyPI.
-This is necessary if you make changes to `pdyndns.py`.  You may need
-to bump the version number in `setup.py`.  If you need to rebuild
-the Docker images after uploading to PyPI, add `--no-cache` to
-`docker-compose build`.
 
 # TODO
 
