@@ -15,7 +15,7 @@ This module communicates with PowerDNS using PowerDNS's [pipe
 backend][1] protocol version 3.  The tool receives a single
 configuration file as parameter, and exchanges information with
 PowerDNS through standard input and output.  The configuration file
-is in JSON format and is validated by the `config.json.schema` [JSON
+is in JSON format and is validated by the `config-schema.json` [JSON
 schema][2].
 
  [1]: https://doc.powerdns.com/md/authoritative/backend-pipe/
@@ -27,7 +27,7 @@ The configuration file specifies the DNS domain the backend is
 responsible for, and information required to answer `SOA` and `NS`
 DNS queries:
 
-``` .json
+``` {.json}
 {
   "domain": "atlas.peering.usc.edu",
   "soa": "atlas.peering.usc.edu noc.peering.usc.edu 20170723 7200 3600 7200 120",
@@ -61,7 +61,7 @@ reads the list of IP addresses from a text file.  The handler
 replies to queries with IP addresses in the text file in round-robin
 order.  Each handler has three parameters:
 
-``` .json
+``` {.json}
 {
   "...": "...",
   "handlers": [
@@ -110,14 +110,6 @@ and performs some linting.
 
  [10]: http://nose.readthedocs.io/en/latest/
  [11]: https://pypi.python.org/pypi/tox
-
-# TODO
-
-[ ] Write JSON configuration schema for validation
-
-[ ] Write benchmark code for the container
-
-[ ] Deploy/integrate with monitoring (Nagios)
 
 # Acknowledgements
 

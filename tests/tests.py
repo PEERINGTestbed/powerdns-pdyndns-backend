@@ -1,5 +1,6 @@
 from io import StringIO
 import json
+import jsonschema
 import shutil
 import tempfile
 from unittest import TestCase
@@ -8,10 +9,28 @@ import pdyndns
 
 class TestPowerDNSPipe(TestCase):
     def setUp(self):
-        fd = open('tests/config.json', 'r')
-        self.config = json.load(fd)
-        fd.close()
+        with open('config-schema.json', 'r') as fd:
+            self.schema = json.load(fd)
+        with open('tests/config.json', 'r') as fd:
+            self.config = json.load(fd)
         self.addrs = '127.0.0.1\t127.0.0.1\t10.0.0.0/8'
+
+    def test_schema_check_correct(self):
+        self.assertIsNone(jsonschema.validate(self.config, self.schema))
+
+    def test_schema_check_incorrect(self):
+        with self.assertRaises(jsonschema.ValidationError):
+            with open('tests/data/config1.json', 'r') as fd:
+                wrong1 = json.load(fd)
+                jsonschema.validate(wrong1, self.schema)
+        with self.assertRaises(jsonschema.ValidationError):
+            with open('tests/data/config2.json', 'r') as fd:
+                wrong2 = json.load(fd)
+                jsonschema.validate(wrong2, self.schema)
+        with self.assertRaises(jsonschema.ValidationError):
+            with open('tests/data/config3.json', 'r') as fd:
+                wrong3 = json.load(fd)
+                jsonschema.validate(wrong3, self.schema)
 
     def test_handshake(self):
         instr = 'HELO\t3\n'

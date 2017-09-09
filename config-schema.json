@@ -1,0 +1,42 @@
+{
+  "title": "PowerDNS PEERING Dynamic DNS Configuration",
+  "type": "object",
+  "properties": {
+    "loglevel": {
+      "type": "string",
+      "enum": ["critical", "error", "warning", "info", "debug"]
+    },
+    "soa": { "type": "string" },
+    "nameservers": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "ttl": { "type": "integer" },
+    "domain": { "type": "string" },
+    "handlers": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/handler" },
+      "uniqueItems": true
+    }
+  },
+  "required": [ "loglevel", "soa", "nameservers", "ttl", "domain", "handlers" ],
+  "additionalProperties": false,
+  "definitions": {
+    "handler": {
+      "type": "object",
+      "properties": {
+        "qname": { "type": "string" },
+        "qtype": {
+          "type": "string",
+          "enum": ["A", "AAAA"]
+        },
+        "file": { "type": "string" }
+      },
+      "required": [ "qname", "qtype", "file" ],
+      "additionalProperties": false
+    }
+  }
+}
