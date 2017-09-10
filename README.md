@@ -105,6 +105,12 @@ to PowerDNS to achieve the same effect):
 atlas.peering.usc.edu.  NS          peering-atlas-ns.vms.uscnsl.net.
 ```
 
+This should go within the zone starting with (something similar to):
+
+```
+@       IN      SOA     peering.usc.edu. peering-ns.usc.edu. (
+```
+
 Testing pdyndns.py
 ==================
 
