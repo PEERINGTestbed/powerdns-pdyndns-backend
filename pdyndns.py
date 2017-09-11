@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 -u
+#!/usr/bin/python3 -u
 
 import argparse
 import json
@@ -153,6 +153,7 @@ def create_handlers(config):
 
 
 def main():
+    sys.stderr.write('THIS IS ME')
     resource.setrlimit(resource.RLIMIT_AS, (1 << 26, 1 << 26))
     parser = create_parser()
     args = parser.parse_args()
@@ -161,6 +162,7 @@ def main():
 
     setup_logging(config)
     handlers = create_handlers(config)
+    logging.debug('GO')
 
     try:
         abi = pdns_handshake(sys.stdin, sys.stdout)

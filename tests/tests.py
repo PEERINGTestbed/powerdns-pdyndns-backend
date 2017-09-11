@@ -11,7 +11,7 @@ class TestPowerDNSPipe(TestCase):
     def setUp(self):
         with open('config-schema.json', 'r') as fd:
             self.schema = json.load(fd)
-        with open('tests/config.json', 'r') as fd:
+        with open('tests/pdyndns.json', 'r') as fd:
             self.config = json.load(fd)
         self.addrs = '127.0.0.1\t127.0.0.1\t10.0.0.0/8'
 
