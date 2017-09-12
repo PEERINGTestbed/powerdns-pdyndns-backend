@@ -153,16 +153,14 @@ def create_handlers(config):
 
 
 def main():
-    sys.stderr.write('THIS IS ME')
     resource.setrlimit(resource.RLIMIT_AS, (1 << 26, 1 << 26))
     parser = create_parser()
     args = parser.parse_args()
-    with open(args.config) as fd:
+    with open(args.config, 'r') as fd:
         config = json.load(fd)
 
     setup_logging(config)
     handlers = create_handlers(config)
-    logging.debug('GO')
 
     try:
         abi = pdns_handshake(sys.stdin, sys.stdout)
