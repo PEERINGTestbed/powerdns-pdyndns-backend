@@ -175,7 +175,6 @@ def main():
     for line in sys.stdin:
         process_query(line, handlers, sys.stdout)
 
-    sys.stdout.write('FAIL\n')
     sys.exit(0)
 
 
