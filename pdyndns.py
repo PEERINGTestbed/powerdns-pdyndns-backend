@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -u
+#!/usr/bin/python3
 
 import argparse
 import json
@@ -45,8 +45,10 @@ def pdns_handshake(fdi, fdo):
     m = re.match(r'^HELO\t(\d+)', line)
     if not m:
         fdo.write('FAIL\n')
+        fdo.flush()
         raise RuntimeError('PowerDNS handshake failed')
     fdo.write('OK\tPEERING dynamic PowerDNS backend\n')
+    fdo.flush()
     logging.debug('pdns_handshake OK')
     return int(m.group(1))
 
@@ -139,7 +141,9 @@ def process_query(line, handlers, fdo):
         for reply in handler.handle(line):
             if reply:
                 fdo.write('\t'.join(str(f) for f in reply) + '\n')
+                fdo.flush()
     fdo.write('END\n')
+    fdo.flush()
 
 
 def create_handlers(config):
@@ -170,6 +174,7 @@ def main():
     if abi != PDNS_PROTOCOL_VERSION:
         logging.error('Unsupported PowerDNS protocol version [%d]', abi)
         sys.stdout.write('FAIL\n')
+        sys.stdout.flush()
         sys.exit(1)
 
     for line in sys.stdin:

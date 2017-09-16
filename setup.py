@@ -10,7 +10,7 @@ setup(
     name='pdyndns',
     description='PEERING testbed dynamic PowerDNS backend',
     long_description=long_description,
-    version='0.5',
+    version='0.5.1',
     author='PEERING Testbed developers',
     author_email='team@peering.usc.edu',
     url='https://github.com/PEERINGTestbed/powerdns-pdyndns-backend',
