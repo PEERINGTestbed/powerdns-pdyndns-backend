@@ -102,7 +102,8 @@ the following to the zone database (equivalent entries can be added
 to PowerDNS to achieve the same effect):
 
 ```
-atlas.peering.usc.edu.  NS          peering-atlas-ns.vms.uscnsl.net.
+pdyndns-1               A           35.196.250.129
+atlas.peering.usc.edu.  NS          pdyndns-1.peering.usc.edu.
 ```
 
 This should go within the zone starting with (something similar to):
