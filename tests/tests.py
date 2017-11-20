@@ -158,11 +158,52 @@ class TestPowerDNSPipe(TestCase):
 
     def test_rr_a_aaaa(self):
         handlers = [pdyndns.RoundRobinFileHandler(h['qname'],
-                                                 h['qtype'],
-                                                 h['file'])
+                                                  h['qtype'],
+                                                  h['file'])
                     for h in self.config['handlers']]
         names = [h['qname'] for h in self.config['handlers']]
         names += ['unknown.dyndns.example.net']
+
+        for name in names[0:2]:
+            instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
+            outstr = 'DATA\t0\t1\t%s\tIN\tA\t0\t-1\t' % name
+            fdout = StringIO()
+            pdyndns.process_query(instr, handlers, fdout)
+            self.assertTrue(fdout.getvalue().startswith(outstr))
+            self.assertTrue(fdout.getvalue().endswith('END\n'))
+            instr = 'Q\t%s\tIN\tAAAA\t-1\t%s\n' % (name, self.addrs)
+            fdout = StringIO()
+            pdyndns.process_query(instr, handlers, fdout)
+            self.assertEqual(fdout.getvalue(), 'END\n')
+
+        for name in names[2:3]:
+            instr = 'Q\t%s\tIN\tAAAA\t-1\t%s\n' % (name, self.addrs)
+            outstr = 'DATA\t0\t1\t%s\tIN\tAAAA\t0\t-1\t' % name
+            fdout = StringIO()
+            pdyndns.process_query(instr, handlers, fdout)
+            self.assertTrue(fdout.getvalue().startswith(outstr))
+            self.assertTrue(fdout.getvalue().endswith('END\n'))
+            instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
+            fdout = StringIO()
+            pdyndns.process_query(instr, handlers, fdout)
+            self.assertEqual(fdout.getvalue(), 'END\n')
+
+        for name in names[3:4]:
+            instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
+            fdout = StringIO()
+            pdyndns.process_query(instr, handlers, fdout)
+            self.assertEqual(fdout.getvalue(), 'END\n')
+
+        for handler in handlers:
+            handler.close()
+
+    def test_rr_a_aaaa_upper(self):
+        handlers = [pdyndns.RoundRobinFileHandler(h['qname'],
+                                                  h['qtype'],
+                                                  h['file'])
+                    for h in self.config['handlers']]
+        names = [h['qname'].upper() for h in self.config['handlers']]
+        names += ['UnknowN.DyndnS.ExamplE.NeT']
 
         for name in names[0:2]:
             instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)

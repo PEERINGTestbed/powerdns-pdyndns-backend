@@ -64,6 +64,7 @@ class RoundRobinFileHandlerSet(object):
     def handle(self, query):
         _q, qname, _qclass, _qtype, _qid, _ip, _localip, _edns = \
                 query.split('\t')
+        qname = qname.lower()
         if qname in self.handlers:
             return self.handlers[qname].handle(query)
         return [tuple()]
@@ -86,7 +87,8 @@ class RoundRobinFileHandler(object):
         logging.debug('RoundRobinFileHandler query [%s]', query)
         _q, qname, qclass, qtype, qid, _ip, _localip, _edns = query.split('\t')
         r = tuple()
-        if (qtype == self.qtype or qtype == 'ANY') and qname == self.qname:
+        if ((qtype == self.qtype or qtype == 'ANY') and
+                qname.lower() == self.qname):
             data = self._readline().strip()
             assert ipaddress.ip_address(data)
             r = ('DATA', PDNS_BITS, 1, qname, qclass, self.qtype, 0, qid, data)
@@ -127,6 +129,7 @@ class DomainHandler(object):
                     qid, data)
         logging.debug('DomainHandler [%s]', query)
         _q, qname, qclass, qtype, qid, _ip, _localip, _edns = query.split('\t')
+        qname = qname.lower()
         r = list()
         if (qtype == 'SOA' or qtype == 'ANY') and qname == self.domain:
             r.append(mkentry('SOA', self.soa))
