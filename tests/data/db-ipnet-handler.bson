@@ -1,0 +1,16 @@
+{
+    "_id": {
+        "$oid": "5eb1604ac78c00f4d1bbe6a5"
+    },
+    "qname": "ipnet.compass.winet.dcc.ufmg.br",
+    "ipaddrs": [
+        "150.164.255.0/24"
+    ],
+    "qtype": "A",
+    "_updated": {
+        "$date": 1588682826000
+    },
+    "_created": {
+        "$date": 1588682826000
+    }
+}

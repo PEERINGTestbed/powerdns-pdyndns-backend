@@ -17,7 +17,7 @@ PDNS_BITS = 0
 def setup_logging(config):
     strlevel = config['loglevel'].upper()
     numlevel = getattr(logging, strlevel, logging.INFO)
-    formatter = logging.Formatter('pdyndns.py %(levelname)s %(message)s')
+    formatter = logging.Formatter('Compass pipe %(levelname)s %(message)s')
     handler = logging.StreamHandler(stream=sys.stderr)
     handler.setFormatter(formatter)
     handler.setLevel(numlevel)
@@ -29,13 +29,8 @@ def setup_logging(config):
 def create_parser():
     desc = '''PEERING dynamic PowerDNS backend for RIPE Atlas'''
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('--config',
-                        dest='config',
-                        action='store',
-                        metavar='JSON',
-                        type=str,
-                        required=True,
-                        help='File containing JSON configuration')
+    parser.add_argument('--config', dest='config', action='store', metavar='JSON', type=str,
+                        required=True, help='File containing JSON configuration')
     return parser
 
 
@@ -57,8 +52,7 @@ class RoundRobinFileHandlerSet(object):
     def __init__(self, config):
         self.handlers = dict()
         for cfg in config['handlers']:
-            self.handlers[cfg['qname']] = RoundRobinFileHandler(cfg['qname'],
-                                                                cfg['qtype'],
+            self.handlers[cfg['qname']] = RoundRobinFileHandler(cfg['qname'], cfg['qtype'],
                                                                 cfg['file'])
 
     def handle(self, query):
@@ -125,8 +119,7 @@ class DomainHandler(object):
 
     def handle(self, query):
         def mkentry(etype, data):
-            return ('DATA', PDNS_BITS, 1, qname, qclass, etype, self.ttl,
-                    qid, data)
+            return ('DATA', PDNS_BITS, 1, qname, qclass, etype, self.ttl, qid, data)
         logging.debug('DomainHandler [%s]', query)
         _q, qname, qclass, qtype, qid, _ip, _localip, _edns = query.split('\t')
         qname = qname.lower()
@@ -152,10 +145,8 @@ def process_query(line, handlers, fdo):
 def create_handlers(config):
     handlers = list()
     handlers.append(RoundRobinFileHandlerSet(config))
-    handlers.append(DomainHandler(config['domain'],
-                                  config['soa'],
-                                  config['nameservers'],
-                                  config['ttl']))
+    handlers.append(DomainHandler(config['domain'], config['soa'], config['nameservers'],
+        config['ttl']))
     return handlers
 
 

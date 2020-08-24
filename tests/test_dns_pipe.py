@@ -5,13 +5,13 @@ import shutil
 import tempfile
 from unittest import TestCase
 
-import pdyndns
+from compass import dns_backend
 
 class TestPowerDNSPipe(TestCase):
     def setUp(self):
         with open('config-schema.json', 'r') as fd:
             self.schema = json.load(fd)
-        with open('tests/pdyndns.json', 'r') as fd:
+        with open('tests/config/test-config.json', 'r') as fd:
             self.config = json.load(fd)
         self.addrs = '127.0.0.1\t127.0.0.1\t10.0.0.0/8'
 
@@ -37,7 +37,7 @@ class TestPowerDNSPipe(TestCase):
         outstr = 'OK\tPEERING dynamic PowerDNS backend\n'
         fdin = StringIO(instr)
         fdout = StringIO()
-        abi = pdyndns.pdns_handshake(fdin, fdout)
+        abi = dns_backend.pdns_handshake(fdin, fdout)
         self.assertEqual(fdout.getvalue(), outstr)
         self.assertEqual(abi, 3)
 
@@ -46,7 +46,7 @@ class TestPowerDNSPipe(TestCase):
         outstr = 'OK\tPEERING dynamic PowerDNS backend\n'
         fdin = StringIO(instr)
         fdout = StringIO()
-        abi = pdyndns.pdns_handshake(fdin, fdout)
+        abi = dns_backend.pdns_handshake(fdin, fdout)
         self.assertEqual(fdout.getvalue(), outstr)
         self.assertEqual(abi, 1)
 
@@ -56,12 +56,12 @@ class TestPowerDNSPipe(TestCase):
         fdin = StringIO(instr)
         fdout = StringIO()
         with self.assertRaises(RuntimeError):
-            abi = pdyndns.pdns_handshake(fdin, fdout)
+            abi = dns_backend.pdns_handshake(fdin, fdout)
             self.assertEqual(fdout.getvalue(), outstr)
             self.assertEqual(abi, 1)
 
     def test_domain_handler(self):
-        dh = pdyndns.DomainHandler(self.config['domain'],
+        dh = dns_backend.DomainHandler(self.config['domain'],
                                   self.config['soa'],
                                   self.config['nameservers'],
                                   self.config['ttl'])
@@ -75,7 +75,7 @@ class TestPowerDNSPipe(TestCase):
         outstr += 'END\n'
 
         fdout = StringIO()
-        pdyndns.process_query(instr, [dh], fdout)
+        dns_backend.process_query(instr, [dh], fdout)
         self.assertEqual(fdout.getvalue(), outstr)
 
         instr = 'Q\t%s\tIN\tANY\t-1\t%s\n' % (
@@ -89,11 +89,11 @@ class TestPowerDNSPipe(TestCase):
                         self.config['domain'], self.config['ttl'], ns)
         outstr += 'END\n'
         fdout = StringIO()
-        pdyndns.process_query(instr, [dh], fdout)
+        dns_backend.process_query(instr, [dh], fdout)
         self.assertEqual(fdout.getvalue(), outstr)
 
     def test_domain_handler_broken_query(self):
-        dh = pdyndns.DomainHandler(self.config['domain'],
+        dh = dns_backend.DomainHandler(self.config['domain'],
                                   self.config['soa'],
                                   self.config['nameservers'],
                                   self.config['ttl'])
@@ -102,29 +102,29 @@ class TestPowerDNSPipe(TestCase):
         outstr = 'END\n'
         fdout = StringIO()
         with self.assertRaises(ValueError):
-            pdyndns.process_query(instr, [dh], fdout)
+            dns_backend.process_query(instr, [dh], fdout)
             self.assertEqual(fdout.getvalue(), outstr)
 
     def test_domain_handler_empty_response(self):
-        dh = pdyndns.DomainHandler(self.config['domain'],
+        dh = dns_backend.DomainHandler(self.config['domain'],
                                   self.config['soa'],
                                   self.config['nameservers'],
                                   self.config['ttl'])
         instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (self.config['domain'], self.addrs)
         outstr = 'END\n'
         fdout = StringIO()
-        pdyndns.process_query(instr, [dh], fdout)
+        dns_backend.process_query(instr, [dh], fdout)
         self.assertEqual(fdout.getvalue(), outstr)
 
         instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (
                     't1.%s' % self.config['domain'], self.addrs)
         outstr = 'END\n'
         fdout = StringIO()
-        pdyndns.process_query(instr, [dh], fdout)
+        dns_backend.process_query(instr, [dh], fdout)
         self.assertEqual(fdout.getvalue(), outstr)
 
     def test_rr(self):
-        handlers = [pdyndns.RoundRobinFileHandler(h['qname'],
+        handlers = [dns_backend.RoundRobinFileHandler(h['qname'],
                                                  h['qtype'],
                                                  h['file'])
                     for h in self.config['handlers']]
@@ -135,7 +135,7 @@ class TestPowerDNSPipe(TestCase):
             instr = 'Q\t%s\tIN\tANY\t-1\t%s\n' % (name, self.addrs)
             outstr = 'DATA\t0\t1\t%s\tIN\tA\t0\t-1\t' % name
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertTrue(fdout.getvalue().startswith(outstr))
             self.assertTrue(fdout.getvalue().endswith('END\n'))
 
@@ -143,21 +143,21 @@ class TestPowerDNSPipe(TestCase):
             instr = 'Q\t%s\tIN\tANY\t-1\t%s\n' % (name, self.addrs)
             outstr = 'DATA\t0\t1\t%s\tIN\tAAAA\t0\t-1\t' % name
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertTrue(fdout.getvalue().startswith(outstr))
             self.assertTrue(fdout.getvalue().endswith('END\n'))
 
         for name in names[3:4]:
             instr = 'Q\t%s\tIN\tANY\t-1\t%s\n' % (name, self.addrs)
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertEqual(fdout.getvalue(), 'END\n')
 
         for handler in handlers:
             handler.close()
 
     def test_rr_a_aaaa(self):
-        handlers = [pdyndns.RoundRobinFileHandler(h['qname'],
+        handlers = [dns_backend.RoundRobinFileHandler(h['qname'],
                                                   h['qtype'],
                                                   h['file'])
                     for h in self.config['handlers']]
@@ -168,37 +168,37 @@ class TestPowerDNSPipe(TestCase):
             instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
             outstr = 'DATA\t0\t1\t%s\tIN\tA\t0\t-1\t' % name
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertTrue(fdout.getvalue().startswith(outstr))
             self.assertTrue(fdout.getvalue().endswith('END\n'))
             instr = 'Q\t%s\tIN\tAAAA\t-1\t%s\n' % (name, self.addrs)
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertEqual(fdout.getvalue(), 'END\n')
 
         for name in names[2:3]:
             instr = 'Q\t%s\tIN\tAAAA\t-1\t%s\n' % (name, self.addrs)
             outstr = 'DATA\t0\t1\t%s\tIN\tAAAA\t0\t-1\t' % name
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertTrue(fdout.getvalue().startswith(outstr))
             self.assertTrue(fdout.getvalue().endswith('END\n'))
             instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertEqual(fdout.getvalue(), 'END\n')
 
         for name in names[3:4]:
             instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertEqual(fdout.getvalue(), 'END\n')
 
         for handler in handlers:
             handler.close()
 
     def test_rr_a_aaaa_upper(self):
-        handlers = [pdyndns.RoundRobinFileHandler(h['qname'],
+        handlers = [dns_backend.RoundRobinFileHandler(h['qname'],
                                                   h['qtype'],
                                                   h['file'])
                     for h in self.config['handlers']]
@@ -209,37 +209,37 @@ class TestPowerDNSPipe(TestCase):
             instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
             outstr = 'DATA\t0\t1\t%s\tIN\tA\t0\t-1\t' % name
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertTrue(fdout.getvalue().startswith(outstr))
             self.assertTrue(fdout.getvalue().endswith('END\n'))
             instr = 'Q\t%s\tIN\tAAAA\t-1\t%s\n' % (name, self.addrs)
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertEqual(fdout.getvalue(), 'END\n')
 
         for name in names[2:3]:
             instr = 'Q\t%s\tIN\tAAAA\t-1\t%s\n' % (name, self.addrs)
             outstr = 'DATA\t0\t1\t%s\tIN\tAAAA\t0\t-1\t' % name
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertTrue(fdout.getvalue().startswith(outstr))
             self.assertTrue(fdout.getvalue().endswith('END\n'))
             instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertEqual(fdout.getvalue(), 'END\n')
 
         for name in names[3:4]:
             instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertEqual(fdout.getvalue(), 'END\n')
 
         for handler in handlers:
             handler.close()
 
     def test_rr_rewind(self):
-        handlers = [pdyndns.RoundRobinFileHandler(h['qname'],
+        handlers = [dns_backend.RoundRobinFileHandler(h['qname'],
                                                  h['qtype'],
                                                  h['file'])
                     for h in self.config['handlers']]
@@ -251,30 +251,30 @@ class TestPowerDNSPipe(TestCase):
                 instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
                 outstr = 'DATA\t0\t1\t%s\tIN\tA\t0\t-1\t' % name
                 fdout = StringIO()
-                pdyndns.process_query(instr, handlers, fdout)
+                dns_backend.process_query(instr, handlers, fdout)
                 self.assertTrue(fdout.getvalue().startswith(outstr))
                 self.assertTrue(fdout.getvalue().endswith('END\n'))
                 instr = 'Q\t%s\tIN\tAAAA\t-1\t%s\n' % (name, self.addrs)
                 fdout = StringIO()
-                pdyndns.process_query(instr, handlers, fdout)
+                dns_backend.process_query(instr, handlers, fdout)
                 self.assertEqual(fdout.getvalue(), 'END\n')
 
             for name in names[2:3]:
                 instr = 'Q\t%s\tIN\tAAAA\t-1\t%s\n' % (name, self.addrs)
                 outstr = 'DATA\t0\t1\t%s\tIN\tAAAA\t0\t-1\t' % name
                 fdout = StringIO()
-                pdyndns.process_query(instr, handlers, fdout)
+                dns_backend.process_query(instr, handlers, fdout)
                 self.assertTrue(fdout.getvalue().startswith(outstr))
                 self.assertTrue(fdout.getvalue().endswith('END\n'))
                 instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
                 fdout = StringIO()
-                pdyndns.process_query(instr, handlers, fdout)
+                dns_backend.process_query(instr, handlers, fdout)
                 self.assertEqual(fdout.getvalue(), 'END\n')
 
             for name in names[3:4]:
                 instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (name, self.addrs)
                 fdout = StringIO()
-                pdyndns.process_query(instr, handlers, fdout)
+                dns_backend.process_query(instr, handlers, fdout)
                 self.assertEqual(fdout.getvalue(), 'END\n')
 
         for handler in handlers:
@@ -282,13 +282,13 @@ class TestPowerDNSPipe(TestCase):
 
     def test_rr_reload(self):
         h = self.config['handlers'][0]
-        rr = pdyndns.RoundRobinFileHandler(h['qname'], h['qtype'], h['file'])
+        rr = dns_backend.RoundRobinFileHandler(h['qname'], h['qtype'], h['file'])
 
         instr = 'Q\t%s\tIN\tA\t-1\t%s\n' % (h['qname'], self.addrs)
         outstr = 'DATA\t0\t1\t%s\tIN\tA\t0\t-1\t10.0.0.1\n' % h['qname']
         outstr += 'END\n'
         fdout = StringIO()
-        pdyndns.process_query(instr, [rr], fdout)
+        dns_backend.process_query(instr, [rr], fdout)
         self.assertEqual(fdout.getvalue(), outstr)
 
         with tempfile.NamedTemporaryFile() as fd:
@@ -299,7 +299,7 @@ class TestPowerDNSPipe(TestCase):
             outstr = 'DATA\t0\t1\t%s\tIN\tA\t0\t-1\t10.1.0.1\n' % h['qname']
             outstr += 'END\n'
             fdout = StringIO()
-            pdyndns.process_query(instr, [rr], fdout)
+            dns_backend.process_query(instr, [rr], fdout)
             self.assertEqual(fdout.getvalue(), outstr)
             # Restore
             shutil.copy(fd.name, h['file'])
@@ -308,13 +308,13 @@ class TestPowerDNSPipe(TestCase):
         outstr = 'DATA\t0\t1\t%s\tIN\tA\t0\t-1\t10.0.0.1\n' % h['qname']
         outstr += 'END\n'
         fdout = StringIO()
-        pdyndns.process_query(instr, [rr], fdout)
+        dns_backend.process_query(instr, [rr], fdout)
         self.assertEqual(fdout.getvalue(), outstr)
 
         rr.close()
 
     def test_rrset(self):
-        rrset = pdyndns.RoundRobinFileHandlerSet(self.config)
+        rrset = dns_backend.RoundRobinFileHandlerSet(self.config)
         handlers = [rrset]
         names = [h['qname'] for h in self.config['handlers']]
         names += ['unknown.dyndns.example.net']
@@ -323,7 +323,7 @@ class TestPowerDNSPipe(TestCase):
             instr = 'Q\t%s\tIN\tANY\t-1\t%s\n' % (name, self.addrs)
             outstr = 'DATA\t0\t1\t%s\tIN\tA\t0\t-1\t' % name
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertTrue(fdout.getvalue().startswith(outstr))
             self.assertTrue(fdout.getvalue().endswith('END\n'))
 
@@ -331,14 +331,14 @@ class TestPowerDNSPipe(TestCase):
             instr = 'Q\t%s\tIN\tANY\t-1\t%s\n' % (name, self.addrs)
             outstr = 'DATA\t0\t1\t%s\tIN\tAAAA\t0\t-1\t' % name
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertTrue(fdout.getvalue().startswith(outstr))
             self.assertTrue(fdout.getvalue().endswith('END\n'))
 
         for name in names[3:4]:
             instr = 'Q\t%s\tIN\tANY\t-1\t%s\n' % (name, self.addrs)
             fdout = StringIO()
-            pdyndns.process_query(instr, handlers, fdout)
+            dns_backend.process_query(instr, handlers, fdout)
             self.assertEqual(fdout.getvalue(), 'END\n')
 
         for handler in handlers:
