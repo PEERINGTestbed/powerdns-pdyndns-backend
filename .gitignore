@@ -2,3 +2,5 @@
 .tox
 .eggs
 __pycache__
+venv
+*.egg-info
