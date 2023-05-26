@@ -1,0 +1,21 @@
+{
+    "loglevel": "debug",
+    "soa": "dyndns.example.net tests.dyndns.example.net 20170723 7200 3600 7200 120",
+    "nameservers": ["ns1.example.net", "ns2.example.net"],
+    "ttl": 3600,
+    "domain": "dyndns.example.net",
+    "handlers": [
+        {
+            "qname": "t1.dyndns.example.net",
+            "qtype": "A",
+            "file": "tests/data/t1.txt",
+            "vpfiles": [
+                {
+                    "resolver": null,
+                    "edns_client_subnet_incorrectname": null,
+                    "file": "tests/data/t1.txt"
+                }
+            ]
+        }
+    ]
+}

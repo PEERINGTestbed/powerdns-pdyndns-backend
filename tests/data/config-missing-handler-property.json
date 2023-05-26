@@ -1,0 +1,13 @@
+{
+    "loglevel": "debug",
+    "nameservers": ["ns1.example.net", "ns2.example.net"],
+    "soa": "dyndns.example.net tests.dyndns.example.net 20170723 7200 3600 7200 120",
+    "ttl": 3600,
+    "domain": "dyndns.example.net",
+    "handlers": [
+        {
+            "qname": "t1.dyndns.example.net",
+            "file": "tests/data/t1.txt"
+        }
+    ]
+}

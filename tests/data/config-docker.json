@@ -1,0 +1,24 @@
+{
+  "loglevel": "debug",
+  "soa": "atlas.peering.ee.columbia.edu. noc.peering.ee.columbia.edu. 20170723 7200 3600 7200 120",
+  "nameservers": ["ns1.peering.ee.columbia.edu", "ns2.peering.ee.columbia.edu"],
+  "ttl": 3600,
+  "domain": "atlas.peering.ee.columbia.edu",
+  "handlers": [
+    {
+      "qname": "t1.atlas.peering.ee.columbia.edu",
+      "qtype": "A",
+      "file": "/etc/powerdns/backend/data/t1.txt"
+    },
+    {
+      "qname": "t2.atlas.peering.ee.columbia.edu",
+      "qtype": "A",
+      "file": "/etc/powerdns/backend/data/t2.txt"
+    },
+    {
+      "qname": "t3.atlas.peering.ee.columbia.edu",
+      "qtype": "AAAA",
+      "file": "/etc/powerdns/backend/data/t3.txt"
+    }
+  ]
+}

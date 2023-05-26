@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  pdns:
+    image: powerdns/pdns-auth-master
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    volumes:
+      - ./pdns.conf:/etc/powerdns/pdns.conf:ro
+      - ../../pdyndns/pdyndns.py:/etc/powerdns/backend/pdyndns.py:ro
+      - ./config-docker.json:/etc/powerdns/backend/config.json:ro
+      - ./:/etc/powerdns/backend/data:ro
+    # environment:
+    #   - PDNS_PIPE_REGEX=atlas.peering.ee.columbia.edu
